@@ -31,24 +31,24 @@ def clamp_at_boundaries(requested_j1, requested_j2):
     return clamped_j1, clamped_j2
 
 def move_arm(pos_j1, pos_j2):
-    time_elasped = rospy.Time.now()
+    time_elapsed = rospy.Time.now()
     j1_publisher.publish(pos_j1)
     j2_publisher.publish(pos_j2)
 
     while True:
         joint_state = rospy.wait_for_message('/simple_arm/joint_states', JointState)
         if at_goal(joint_state.position[0], pos_j1, joint_state.position[1], pos_j2):
-            time_elasped = joint_state.header.stamp - time_elasped
+            time_elapsed = joint_state.header.stamp - time_elapsed
             break
 
-    return time_elasped
+    return time_elapsed
 
 def handle_safe_move_request(req):
     rospy.loginfo('GoToPositionRequest Received - j1:%s, j2:%s', req.joint_1, req.joint_2)
     clamp_j1, clamp_j2 = clamp_at_boundaries(req.joint_1, req.joint_2)
     time_elapsed = move_arm(clamp_j1, clamp_j2)
 
-    return GoToPositionResponse(time_elasped)
+    return GoToPositionResponse(time_elapsed)
 
 def mover_service():
     rospy.init_node('arm_mover')
